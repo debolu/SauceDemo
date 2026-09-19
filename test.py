@@ -45,6 +45,24 @@ driver.find_element(By.ID, "last-name").send_keys(fake.last_name())
 driver.find_element(By.ID, "postal-code").send_keys(fake.postcode())
 driver.find_element(By.ID, "continue").click()
 
+# Assert that the prices are accurate.
+product_prices = driver.find_elements(By.CLASS_NAME, "inventory_item_price")
+prices = [float(p.text.replace("$", "")) for p in product_prices]
+sum_price = sum(prices)
+
+displayed_sum_price = float(driver.find_element(By.CLASS_NAME, "summary_subtotal_label").text.split("$")[1])
+assert abs(sum_price - displayed_sum_price) < 0.001
+
+tax_text = driver.find_element(By.CLASS_NAME, "summary_tax_label").text
+displayed_tax_price = float(tax_text.split("$")[1])
+
+expected_total = displayed_sum_price + displayed_tax_price
+
+total_price_text = driver.find_element(By.CLASS_NAME, "summary_total_label").text
+displayed_total_price = float(total_price_text.split("$")[1])
+assert abs(expected_total - displayed_total_price) < 0.001
+
+
 driver.find_element(By.ID, "finish").click()
 
 driver.find_element(By.ID, "back-to-products")
